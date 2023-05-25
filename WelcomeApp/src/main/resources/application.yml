@@ -1,0 +1,20 @@
+server:
+  port: 8091
+  
+spring:
+  application:
+    name: WELCOMEAPI
+
+  config:
+    import: optional:configserver:http://localhost:9022
+
+  boot:
+    admin:
+      client:
+        url: http://localhost:8080/
+        
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
