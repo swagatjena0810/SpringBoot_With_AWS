@@ -3,9 +3,13 @@ package com.RI._AdminModule.Services;
 import java.util.List;
 import java.util.Optional;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 
+import com.RI._AdminModule.Entities.Role;
 import com.RI._AdminModule.Entities.User;
 import com.RI._AdminModule.Exceptions.CaseWorkerAlreadyExistsException;
 import com.RI._AdminModule.Exceptions.CaseworkerNotFoundException;
@@ -32,9 +36,14 @@ public class UserServiceImpl implements IUserService{
 	@Autowired
 	private PasswordUtils passwordUtils;
 	
+	@Autowired
+	private HttpSession session;
+
+	
 	@Override
 	public User addCaseworker(User caseworker) {
 		Optional<User> user=this.userRepository.findByemailId(caseworker.getEmailId());
+		String loggedInUser=(String)session.getAttribute("emailId");
 		if(user.isPresent()) {
 			throw new CaseWorkerAlreadyExistsException(
 					caseworker.getEmailId()+AppConstants.caseworkerExists);
@@ -42,7 +51,9 @@ public class UserServiceImpl implements IUserService{
 		else {
 			String randomPass=passwordUtils.generateRandompwdUUID();
 			caseworker.setUserPassword(randomPass);
-			caseworker.setUserRole(AppConstants.roleCaseworker);
+		//	caseworker.setRole(new Role("ROLE_CW"));
+			
+			caseworker.setCreatedBy(loggedInUser);
 			String to=caseworker.getEmailId();
 			String subject=AppConstants.passwordGeneratedSubject;
 			String body=AppConstants.passwordGeneratedBody+randomPass;
@@ -57,6 +68,8 @@ public class UserServiceImpl implements IUserService{
 	public User updateCaseworker(User caseworker) {
 		Optional<User> user=this.userRepository.findByemailId(caseworker.getEmailId());
 		if(user.isPresent()) {
+			String loggedInUser=(String)session.getAttribute("emailId");
+			caseworker.setUpdatedBy(loggedInUser);
 			return userRepository.save(caseworker);
 		}
 		else {
@@ -70,8 +83,10 @@ public class UserServiceImpl implements IUserService{
 	public String deactivateCaseworker(String emailId) {
 		Optional<User> op=this.userRepository.findByemailId(emailId);
 		if(op.isPresent()) {
+			String loggedInUser=(String)session.getAttribute("emailId");
 			User user=op.get();
 			user.setActive(false);
+			user.setUpdatedBy(loggedInUser);
 			userRepository.save(user);
 			return user.getEmailId()+AppConstants.responseAfterAccountDeactivated;
 		}
@@ -86,8 +101,10 @@ public class UserServiceImpl implements IUserService{
 	public String activateCaseworker(String emailId) {
 		Optional<User> op=this.userRepository.findByemailId(emailId);
 		if(op.isPresent()) {
+			String loggedInUser=(String)session.getAttribute("emailId");
 			User user=op.get();
 			user.setActive(true);
+			user.setUpdatedBy(loggedInUser);
 			userRepository.save(user);
 			return user.getEmailId()+AppConstants.responseAfterAccountActivated;
 		}
@@ -110,6 +127,7 @@ public class UserServiceImpl implements IUserService{
 		Optional<User> opuser=this.userRepository.findByemailId(emailId);
 		if(opuser.isPresent()) {
 			if(opuser.get().getUserPassword().equals(userPassword)) {
+				session.setAttribute("emailId", opuser.get().getEmailId());
 				return AppConstants.loginSucess;
 			}
 			else {

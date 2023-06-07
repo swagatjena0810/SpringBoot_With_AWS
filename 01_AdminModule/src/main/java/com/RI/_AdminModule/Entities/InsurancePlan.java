@@ -8,6 +8,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -48,9 +52,11 @@ public class InsurancePlan {
 	private String updatedBy;
 	
 	@Column(name="CREATED_DATE")
+	@CreationTimestamp
 	private LocalDate createdDate;
 	
 	@Column(name="UPDATED_DATE")
+	@UpdateTimestamp
 	private LocalDate updatedDate;
 	
 }

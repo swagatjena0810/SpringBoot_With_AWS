@@ -1,8 +1,10 @@
 package com.RI._AdminModule.Services;
 
-import java.time.LocalDate;
+
 import java.util.List;
 import java.util.Optional;
+
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,9 @@ public class InsurancePlanServiceImpl implements IInsurancePlanService {
 	@Autowired
 	private PlanRepository planRepository;
 	
+	@Autowired
+	private HttpSession session;
+	
 	@Override
 	public InsurancePlan addInsurancePlan(InsurancePlan insurancePlan) {
 		Optional<InsurancePlan> iPlan=this.planRepository.findByPlanName(insurancePlan.getPlanName());
@@ -26,8 +31,10 @@ public class InsurancePlanServiceImpl implements IInsurancePlanService {
 			throw new PlanAlreadyExistsException(insurancePlan.getPlanName()+AppConstants.planExists);
 		}
 		else {
-			LocalDate date = null;
-			insurancePlan.setCreatedDate(date.now());
+//			LocalDate date = null;
+//			insurancePlan.setCreatedDate(date.now());
+			String loggedInUser=(String)session.getAttribute("emailId");
+			insurancePlan.setCreatedBy(loggedInUser);
 			return this.planRepository.save(insurancePlan);
 		}
 	}
@@ -36,8 +43,10 @@ public class InsurancePlanServiceImpl implements IInsurancePlanService {
 	public InsurancePlan updateInsurancePlan(InsurancePlan insurancePlan) {
 		Optional<InsurancePlan> iPlan=this.planRepository.findByPlanName(insurancePlan.getPlanName());
 		if(iPlan.isPresent()) {
-			LocalDate date=null;
-			insurancePlan.setUpdatedDate(date.now());
+//			LocalDate date=null;
+//			insurancePlan.setUpdatedDate(date.now());
+			String loggedInUser=(String)session.getAttribute("emailId");
+			insurancePlan.setUpdatedBy(loggedInUser);;
 			return this.planRepository.save(insurancePlan);
 		}
 		else {
@@ -61,8 +70,10 @@ public class InsurancePlanServiceImpl implements IInsurancePlanService {
 	public String deactivateInsurancePlan(String planName) {
 		Optional<InsurancePlan> iPlan=this.planRepository.findByPlanName(planName);
 		if(iPlan.isPresent()) {
+			String loggedInUser=(String)session.getAttribute("emailId");
 			InsurancePlan plan=iPlan.get();
 			plan.setActive(false);
+			plan.setUpdatedBy(loggedInUser);
 			planRepository.save(plan);
 			return plan.getPlanName()+AppConstants.responseAfterPlanDeactivated;
 		}
@@ -77,8 +88,10 @@ public class InsurancePlanServiceImpl implements IInsurancePlanService {
 	public String activateInsurancePlan(String planName) {
 		Optional<InsurancePlan> iPlan=this.planRepository.findByPlanName(planName);
 		if(iPlan.isPresent()) {
+			String loggedInUser=(String)session.getAttribute("emailId");
 			InsurancePlan plan=iPlan.get();
 			plan.setActive(true);
+			plan.setUpdatedBy(loggedInUser);
 			planRepository.save(plan);
 			return plan.getPlanName()+AppConstants.responseAfterPlanActivated;
 			

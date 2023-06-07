@@ -4,10 +4,16 @@ import java.time.LocalDate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,6 +39,9 @@ public class User {
 	@Column(name="Email_ID")
 	private String emailId;
 	
+	@Column(name="Password")
+	private String userPassword;
+	
 	@Column(name="Mobile_Number")
 	private Long mobileNumber;
 	
@@ -48,11 +57,9 @@ public class User {
 	@Column(name="Active")
 	private boolean isActive;
 	
-	@Column(name="User_Role")
-	private String userRole;
-	
-	@Column(name="Password")
-	private String userPassword;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name="role_id")
+	private Role role;
 	
 	@Column(name="CREATED_BY")
 	private String createdBy;
@@ -61,8 +68,10 @@ public class User {
 	private String updatedBy;
 	
 	@Column(name="CREATED_DATE")
+	@CreationTimestamp
 	private LocalDate createdDate;
 	
 	@Column(name="UPDATED_DATE")
+	@UpdateTimestamp
 	private LocalDate updatedDate;
 }
